@@ -1,5 +1,6 @@
 package com.dev.eloper.mud
 
+import com.dev.eloper.mud.room.Room
 import com.dev.eloper.mud.service.User
 import com.dev.eloper.mud.service.UserService
 import com.google.gson.*
@@ -22,6 +23,11 @@ fun Application.module() {
     routing {
         val connections = Collections.synchronizedSet<Connection?>(LinkedHashSet())
         webSocket("/mud") {
+            //Setup
+            val connection = Connection(this)
+            connections += connection
+            var currentRoom: Room? = null
+
             send(
                 createResponseString(
                     responseType = SocketResponseType.SYSTEM_MESSAGE,
@@ -34,8 +40,6 @@ fun Application.module() {
                     userMessage = "What is your name?"
                 )
             )
-            val connection = Connection(this)
-            connections += connection
             for (frame in incoming) {
                 frame as? Frame.Text ?: continue
                 val receivedText: String = frame.readText()
@@ -62,6 +66,13 @@ fun Application.module() {
                     }
                 } else {
                     // The user is logged in
+                    if (currentRoom == null) {
+                        if(userMessage.messageType == SocketMessageType.CHANGE_ROOM) {
+
+                        } else {
+
+                        }
+                    }
                     if (userMessage.messageType == SocketMessageType.CHAT) {
                         connections.forEach {
                             it.session.send(
